@@ -130,6 +130,7 @@ int main(int argc, char* argv[])
 {
     char *remoteIp;
     char *role;
+    char *test;
     char str[100], str2[100];
     char board[3][3];
     bool validMove;
@@ -162,34 +163,44 @@ int main(int argc, char* argv[])
     // A server will wait to accept an invitation to play
     // A client will send an invitation to play
     bool client = false;
-    if(role = "invite"){
+    if(strcmp(role,"invite")==0){
         client = true;
         remotePort=SERVER_PORT;
     }
-    else{
+    if(strcmp(role,"accept")==0){
         remotePort=CLIENT_PORT;
     }
-    // TODO: Open listener port number dependent on client/server role
     openListenerPort(remoteIp,remotePort);
+    printf("%d\n",remotePort);
+    printf("%s\n",remoteIp);
+    // TODO: Open listener port number dependent on client/server role
+    printf("%d\n",openListenerPort(remoteIp,remotePort));
+    
     // TODO: Determine remote port that you will send data to
     //       If you are server, send to client port, and vice versa
-    if(client = true){
-        sendData(remoteIp,remotePort,"invite");
+    /*if(client == true){
+        sendData(remoteIp,remotePort,role);
+        printf("sent\n");
     }
-    else{    
-        receiveData("invite",6);
+    if(client == false){
+        printf("waiting\n"); 
+        receiveData(test,6);
+        if(strcmp(test,"invite")==0){
+            closeListenerPort();
+            return EXIT_SUCCESS;
+        }
     }
-    
+    printf("success");
     // Setup game
     clearBoard(board);
 
     // TODO: Determine whether it is your turn or not
     myTurn=false;
-    if(client= true){
+    if(client== true){
         myTurn=true;
     }
     // TODO: Determine your letter (x or o) and your opponent's letter
-    if(client= true){
+    if(client== true){
         myLetter='x';
         opponentLetter='o';
     }
@@ -223,11 +234,11 @@ int main(int argc, char* argv[])
         // get opponent's move
         if (myTurn==false)
         {
+            receiveData(move,2);
             printf("\nOpponent Moved\n");
             // TODO: add code to receive your opponent's move, validate move,
             //       show board, sizeof move, stdin);, and check for a winner
             showBoard(board);
-            move=receiveData(move,2);
             addMove(board,move,opponentLetter);
             myTurn=true;
             
@@ -239,7 +250,7 @@ int main(int argc, char* argv[])
     if (winner == false){
         printf("The game was a draw\n");}
 
-    // TO DO: Close listener port
+    // TO DO: Close listener port*/
     closeListenerPort();
     return EXIT_SUCCESS;
 }
