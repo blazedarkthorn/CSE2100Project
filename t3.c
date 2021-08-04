@@ -170,37 +170,36 @@ int main(int argc, char* argv[])
     if(strcmp(role,"accept")==0){
         remotePort=CLIENT_PORT;
     }
-    openListenerPort(remoteIp,remotePort);
-    printf("%d\n",remotePort);
-    printf("%s\n",remoteIp);
-    // TODO: Open listener port number dependent on client/server role
-    printf("%d\n",openListenerPort(remoteIp,remotePort));
     
     // TODO: Determine remote port that you will send data to
     //       If you are server, send to client port, and vice versa
-    /*if(client == true){
-        sendData(remoteIp,remotePort,role);
+    if(client == true){
+        sendData(remoteIp,remotePort,"invite");
         printf("sent\n");
     }
     if(client == false){
         printf("waiting\n"); 
-        receiveData(test,6);
-        if(strcmp(test,"invite")==0){
+        receiveData("invite",6);
+        if(strcmp(str,"invite")!=0){
             closeListenerPort();
             return EXIT_SUCCESS;
         }
     }
+
+    // TODO: Open listener port number dependent on client/server role
+    openListenerPort(remoteIp,remotePort);
+
     printf("success");
     // Setup game
     clearBoard(board);
 
     // TODO: Determine whether it is your turn or not
-    myTurn=false;
     if(client== true){
-        myTurn=true;
+        myTurn=false;
     }
     // TODO: Determine your letter (x or o) and your opponent's letter
-    if(client== true){
+    if(client== false){
+        myTurn=true;
         myLetter='x';
         opponentLetter='o';
     }
@@ -250,7 +249,7 @@ int main(int argc, char* argv[])
     if (winner == false){
         printf("The game was a draw\n");}
 
-    // TO DO: Close listener port*/
+    // TO DO: Close listener port
     closeListenerPort();
     return EXIT_SUCCESS;
 }
