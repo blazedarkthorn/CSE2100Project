@@ -18,8 +18,8 @@
 
 #include "udp.h"
 
-#define CLIENT_PORT 4096
-#define SERVER_PORT 4097
+#define CLIENT_PORT 1111
+#define SERVER_PORT 1112
 
 void clearBoard(char board[3][3])
 {
@@ -69,7 +69,7 @@ bool isWinner(char board[3][3], char xo)
     if((board[0][2]==board[1][1]&&board[0][1]==board[2][0])){
         if(board[0][2]== xo){printf( "\n%c wins!\n",xo); showBoard(board); return true;}
     }
-    
+
     return win;
 }
 
@@ -137,6 +137,7 @@ int main(int argc, char* argv[])
     bool winner = false;
     int moveCount = 0;
     char move[2];
+    bool trigger = false;
     
     bool myTurn;
     char myLetter, opponentLetter;
@@ -163,13 +164,21 @@ int main(int argc, char* argv[])
     // A server will wait to accept an invitation to play
     // A client will send an invitation to play
     bool client = false;
-    if(strcmp(role,"invite")==0){
+    if(strcmp(role, "invite")==0){
         client = true;
         remotePort=SERVER_PORT;
+        openListenerPort(remoteIp,CLIENT_PORT);
     }
-    if(strcmp(role,"accept")==0){
+    else if(strcmp(role, "accept")==0){
         remotePort=CLIENT_PORT;
+        openListenerPort(remoteIp,SERVER_PORT);
     }
+    //openListenerPort(remoteIp,remotePort);
+    printf("%d\n",remotePort);
+    printf("%s\n",remoteIp);
+    
+    // TODO: Open listener port number dependent on client/server role
+    //printf("%d\n",openListenerPort(remoteIp,remotePort));
     
     // TODO: Determine remote port that you will send data to
     //       If you are server, send to client port, and vice versa
@@ -177,29 +186,26 @@ int main(int argc, char* argv[])
         sendData(remoteIp,remotePort,"invite");
         printf("sent\n");
     }
-    if(client == false){
+    else if(client == false){
         printf("waiting\n"); 
-        receiveData("invite",6);
-        if(strcmp(str,"invite")!=0){
-            closeListenerPort();
-            return EXIT_SUCCESS;
+        receiveData(str, 10);
+        if(strcmp(str, "invite") == 0){
+            printf("Invitation accepted\n");
         }
+        else
+            return 0;
     }
-
-    // TODO: Open listener port number dependent on client/server role
-    openListenerPort(remoteIp,remotePort);
-
-    printf("success");
+    
     // Setup game
     clearBoard(board);
 
     // TODO: Determine whether it is your turn or not
+    myTurn=true;
     if(client== true){
         myTurn=false;
     }
     // TODO: Determine your letter (x or o) and your opponent's letter
-    if(client== false){
-        myTurn=true;
+    if(client== true){
         myLetter='x';
         opponentLetter='o';
     }
@@ -215,7 +221,6 @@ int main(int argc, char* argv[])
     while(winner == false && moveCount != 9)
     {
         // get my move
-        
         if (myTurn==true)
         {
             // TODO: add code your move here to get the move, validate move,
@@ -229,6 +234,16 @@ int main(int argc, char* argv[])
             validMove=false;
             myTurn=false;
             sendData(remoteIp,remotePort,move);
+            winner=isWinner(board,opponentLetter);
+            if(winner == true){
+                closeListenerPort();
+                return 0;
+            }
+            winner=isWinner(board,myLetter);
+            if(winner == true){
+                closeListenerPort();
+                return 0;
+            }
         }
         // get opponent's move
         if (myTurn==false)
@@ -240,11 +255,20 @@ int main(int argc, char* argv[])
             showBoard(board);
             addMove(board,move,opponentLetter);
             myTurn=true;
-            
+            winner=isWinner(board,opponentLetter);
+            if(winner == true){
+                closeListenerPort();
+                return 0;
+            }
+            winner=isWinner(board,myLetter);
+            if(winner == true){
+                closeListenerPort();
+                return 0;
+            }
         }
         moveCount++;
-        winner = isWinner(board,opponentLetter);
-        winner = isWinner(board,myLetter);
+
+        
     }
     if (winner == false){
         printf("The game was a draw\n");}
